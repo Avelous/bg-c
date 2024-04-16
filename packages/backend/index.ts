@@ -7,7 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import http from "http";
 import Ably from "ably";
-import path = require("path");
+import * as path from "path";
 import { Server as SocketIOServer } from "socket.io";
 
 declare global {
