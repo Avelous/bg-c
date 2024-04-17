@@ -23,7 +23,7 @@ const deployBgcord: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   const { deploy } = hre.deployments;
   const name = "Bgcord";
   const symbol = "BGD";
-  const CHANNEL_NAMES = ["general", "intro", "jobs"];
+  const CHANNEL_NAMES = ["general", "intro", "scaffold-eth"];
 
   await deploy("Bgcord", {
     from: deployer,

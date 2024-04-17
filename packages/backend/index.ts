@@ -67,6 +67,7 @@ const connectWithRetry = async () => {
         channel.subscribe("getMessages", async () => {
           const messages = await Message.find().lean();
           channel.publish("messages", messages);
+          console.log("messages requested");
         });
         channel.subscribe("newMessage", async msg => {
           const newMessage = new Message(msg.data);
