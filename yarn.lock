@@ -1916,6 +1916,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.39.0
     "@uniswap/sdk-core": ^4.0.1
     "@uniswap/v2-sdk": ^3.0.1
+    ably: ^2.0.2
     autoprefixer: ^10.4.12
     blo: ^1.0.1
     daisyui: 4.5.0
@@ -4066,6 +4067,26 @@ __metadata:
     react-dom:
       optional: true
   checksum: e9f47670d06ed48aa1132b96b4e15e47a97fc5fb17f34ea8fb3ffca89f66be1e4a667564e4b33a513e18d03a161b64d36cd4d08d5cdce7a5bd3a6769ebe0f2f0
+  languageName: node
+  linkType: hard
+
+"ably@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "ably@npm:2.0.2"
+  dependencies:
+    "@ably/msgpack-js": ^0.4.0
+    fastestsmallesttextencoderdecoder: ^1.0.22
+    got: ^11.8.5
+    ws: ^8.14.2
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 88c356df6b612bf414fd4eb8f624216161e921af7c8ed85552456f93c0782120f9aba34dfed4f345d747e0405be2185bb0f346dee64b57d2fa7fcae72ea7bdaa
   languageName: node
   linkType: hard
 
@@ -7748,6 +7769,13 @@ __metadata:
   version: 1.0.0
   resolution: "fast-stable-stringify@npm:1.0.0"
   checksum: ef1203d246a7e8ac15e2bfbda0a89fa375947bccf9f7910be0ea759856dbe8ea5024a0d8cc2cceabe18a9cb67e95927b78bb6173a3ae37ec55a518cf36e5244b
+  languageName: node
+  linkType: hard
+
+"fastestsmallesttextencoderdecoder@npm:^1.0.22":
+  version: 1.0.22
+  resolution: "fastestsmallesttextencoderdecoder@npm:1.0.22"
+  checksum: cc5e6c3b4c13de41a24e1311af4d0726e85d9edd75af8a13282f9e5f2751805d869455352a0bf065ab59c9c240d078b7abd98d676da9257666402e56ce9395d0
   languageName: node
   linkType: hard
 

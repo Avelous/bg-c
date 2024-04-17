@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Address } from "../scaffold-eth";
-import { io } from "socket.io-client";
+import Ably from "ably";
 import { useAccount } from "wagmi";
 // Assets
 import person from "~~/assets/person.svg";
@@ -9,10 +9,8 @@ import send from "~~/assets/send.svg";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { Channel, Message } from "~~/types/bgcord";
 
-// Socket
-const socket = io("ws://localhost:6001");
-
 const Messages = ({ messages, currentChannel }: { messages: Message[]; currentChannel: Channel | null }) => {
+  const ablyApiKey = process.env.NEXT_PUBLIC_ABLY_API_KEY;
   const [message, setMessage] = useState("");
   const { address } = useAccount();
 
@@ -32,6 +30,8 @@ const Messages = ({ messages, currentChannel }: { messages: Message[]; currentCh
 
   const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const ably = new Ably.Realtime({ key: ablyApiKey });
+    const channel = ably.channels.get("messages");
 
     const messageObj = {
       channel: currentChannel?.id.toString() as string,
@@ -40,9 +40,8 @@ const Messages = ({ messages, currentChannel }: { messages: Message[]; currentCh
     };
 
     if (message !== "") {
-      socket.emit("new message", messageObj);
+      await channel.publish("newMessage", messageObj);
     }
-
     setMessage("");
   };
 

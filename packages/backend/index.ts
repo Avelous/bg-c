@@ -8,7 +8,6 @@ import morgan from "morgan";
 import http from "http";
 import Ably from "ably";
 import * as path from "path";
-import { Server as SocketIOServer } from "socket.io";
 
 declare global {
   namespace Express {
@@ -36,7 +35,7 @@ app.use(cors());
 
 export const ably = new Ably.Realtime({ key: process.env.ABLY_API_KEY });
 
-// const server = http.createServer(app);
+const server = http.createServer(app);
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
 const MONGO_URL = process.env.MONGO_URL || "";
@@ -50,38 +49,32 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model("Message", messageSchema);
 
-const server = app.listen(PORT, () => console.log(`Listening on ${PORT}\n`));
-
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: "*",
-  },
-});
-
-io.on("connection", socket => {
-  // console.log("a user connected");
-
-  socket.on("get messages", async () => {
-    const messages = await Message.find().lean();
-    io.emit("get messages", messages);
-  });
-
-  socket.on("new message", async msg => {
-    const newMessage = new Message(msg);
-    await newMessage.save();
-    const messages = await Message.find().lean();
-    io.emit("new message", messages);
-  });
-});
+const channel = ably.channels.get(`messages`);
+channel.attach();
 
 const connectWithRetry = async () => {
   await ably.connection.once("connected");
-  ably.channels.get(`messagesUpdate`);
+  ably.channels.get(`messages`);
   console.log("connecting");
   mongoose
     .connect(MONGO_URL)
-    .then(() => {
-      console.log(`Server Connected, Port: ${PORT}`);
+    .then(async () => {
+      app.listen(PORT, async () => {
+        console.log(`Server connected to port: ${PORT}\n`);
+        const messages = await Message.find().lean();
+        channel.attach();
+        channel.publish("messages", messages);
+        channel.subscribe("getMessages", async () => {
+          const messages = await Message.find().lean();
+          channel.publish("messages", messages);
+        });
+        channel.subscribe("newMessage", async msg => {
+          const newMessage = new Message(msg.data);
+          await newMessage.save();
+          const messages = await Message.find().lean();
+          channel.publish("messages", messages);
+        });
+      });
     })
     .catch(error => {
       console.log(`${error} did not connect`);
