@@ -1,16 +1,16 @@
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Address } from "../scaffold-eth";
-import Ably from "ably";
 import { useAccount } from "wagmi";
 // Assets
 import person from "~~/assets/person.svg";
 import send from "~~/assets/send.svg";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import serverConfig from "~~/server.config";
 import { Channel, Message } from "~~/types/bgcord";
 
 const Messages = ({ messages, currentChannel }: { messages: Message[]; currentChannel: Channel | null }) => {
-  const ablyApiKey = process.env.NEXT_PUBLIC_ABLY_API_KEY;
+  const serverUrl = serverConfig.isLocal ? serverConfig.localUrl : serverConfig.liveUrl;
   const [message, setMessage] = useState("");
   const { address } = useAccount();
 
@@ -28,10 +28,8 @@ const Messages = ({ messages, currentChannel }: { messages: Message[]; currentCh
 
   const messageEndRef: MutableRefObject<null> = useRef(null);
 
-  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const ably = new Ably.Realtime({ key: ablyApiKey });
-    const channel = ably.channels.get("messages");
+  const sendMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     const messageObj = {
       channel: currentChannel?.id.toString() as string,
@@ -39,9 +37,12 @@ const Messages = ({ messages, currentChannel }: { messages: Message[]; currentCh
       text: message,
     };
 
-    if (message !== "") {
-      await channel.publish("newMessage", messageObj);
-    }
+    await fetch(`${serverUrl}/user/new`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(messageObj),
+    });
+
     setMessage("");
   };
 

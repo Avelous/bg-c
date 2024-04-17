@@ -8,6 +8,7 @@ import morgan from "morgan";
 import http from "http";
 import Ably from "ably";
 import * as path from "path";
+import userRoutes from "./routes/user";
 
 declare global {
   namespace Express {
@@ -40,17 +41,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 6001;
 const MONGO_URL = process.env.MONGO_URL || "";
 
-/* Mongoose Model */
-const messageSchema = new mongoose.Schema({
-  channel: String,
-  account: String,
-  text: String,
-});
-
-const Message = mongoose.model("Message", messageSchema);
-
-const channel = ably.channels.get(`messages`);
-channel.attach();
+app.use("/user", userRoutes);
 
 const connectWithRetry = async () => {
   await ably.connection.once("connected");
@@ -59,27 +50,11 @@ const connectWithRetry = async () => {
   mongoose
     .connect(MONGO_URL)
     .then(async () => {
-      app.listen(PORT, async () => {
-        console.log(`Server connected to port: ${PORT}\n`);
-        const messages = await Message.find().lean();
-        channel.attach();
-        channel.publish("messages", messages);
-        channel.subscribe("getMessages", async () => {
-          const messages = await Message.find().lean();
-          channel.publish("messages", messages);
-          console.log("messages requested");
-        });
-        channel.subscribe("newMessage", async msg => {
-          const newMessage = new Message(msg.data);
-          await newMessage.save();
-          const messages = await Message.find().lean();
-          channel.publish("messages", messages);
-        });
-      });
+      server.listen(PORT, () => console.log(`Server Connected, Port: ${PORT}`));
     })
     .catch(error => {
       console.log(`${error} did not connect`);
-      // setTimeout(connectWithRetry, 3000);
+      setTimeout(connectWithRetry, 3000);
     });
 };
 
